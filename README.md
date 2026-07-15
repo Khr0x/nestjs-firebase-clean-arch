@@ -2,8 +2,8 @@
 
 REST API de usuarios con NestJS, Firestore y Clean Architecture.
 
-Proyecto para una prueba tecnica backend. El objetivo final es capturar usuarios
-en Firestore y, cuando se cree un usuario sin `password`, disparar un evento que
+Proyecto para una prueba tecnica backend. El objetivo es capturar usuarios en
+Firestore y, cuando se cree un usuario sin `password`, disparar un evento que
 genere un password seguro y actualice el registro.
 
 ## Stack
@@ -18,29 +18,73 @@ genere un password seguro y actualice el registro.
 
 ## Estado actual
 
-- Fase 1 completada: capa de dominio en TypeScript puro.
-- Tests unitarios de dominio en `test/unit/domain`.
-- Coverage configurado para la capa de dominio con logica.
+El proyecto ya tiene implementadas las capas internas:
+
+- Dominio puro en `src/domain`.
+- Casos de uso de usuarios en `src/application`.
+- Tests unitarios de dominio y aplicacion.
 - CI en GitHub Actions para validar Pull Requests.
+
+La API HTTP de usuarios, los adaptadores de Firestore, bcrypt, crypto y el
+listener de eventos todavia no estan conectados. Por ahora NestJS conserva el
+endpoint base de ejemplo.
 
 ## Arquitectura actual
 
 ```text
-src/domain/
-├── entities/
-│   └── user.entity.ts
-├── errors/
-│   └── invalid-user-data.error.ts
-├── events/
-│   └── user-created.event.ts
-└── ports/
-    ├── password-generator.ts
-    ├── password-hasher.ts
-    └── user.repository.ts
+src/
+├── application/
+│   ├── dtos/
+│   │   ├── create-user.input.ts
+│   │   ├── update-user.input.ts
+│   │   └── user.output.ts
+│   └── use-cases/
+│       ├── assign-generated-password.use-case.ts
+│       ├── create-user.use-case.ts
+│       ├── delete-user.use-case.ts
+│       ├── get-user.use-case.ts
+│       ├── list-users.use-case.ts
+│       └── update-user.use-case.ts
+└── domain/
+    ├── entities/
+    │   └── user.entity.ts
+    ├── errors/
+    │   ├── email-already-in-use.error.ts
+    │   ├── invalid-user-data.error.ts
+    │   └── user-not-found.error.ts
+    ├── events/
+    │   └── user-created.event.ts
+    └── ports/
+        ├── event-publisher.ts
+        ├── password-generator.ts
+        ├── password-hasher.ts
+        └── user.repository.ts
 ```
 
-La capa `src/domain` no depende de NestJS, Firebase Admin SDK ni bcrypt.
-Los adaptadores concretos se agregaran en fases posteriores.
+La regla actual es simple:
+
+```text
+domain <- application
+```
+
+`src/domain` y `src/application` no dependen de NestJS, Firebase Admin SDK,
+bcrypt ni HTTP. La aplicacion trabaja contra puertos: `UserRepository`,
+`PasswordHasher`, `PasswordGenerator` y `EventPublisher`.
+
+## Casos de uso disponibles
+
+- `CreateUserUseCase`: crea usuarios, valida email duplicado, hashea password
+  si viene y publica `UserCreatedEvent`.
+- `AssignGeneratedPasswordUseCase`: genera y asigna password cuando el usuario
+  no tiene uno; es idempotente.
+- `GetUserUseCase`: obtiene un usuario por id.
+- `ListUsersUseCase`: lista usuarios con `page = 1` y `limit = 10` por defecto;
+  `limit` maximo `100`.
+- `UpdateUserUseCase`: actualiza `username` y/o `email`; no permite modificar
+  password por esta via.
+- `DeleteUserUseCase`: elimina usuarios.
+
+Los outputs de aplicacion usan `UserOutput` y no exponen `password` ni hash.
 
 ## Requisitos
 
@@ -150,8 +194,7 @@ Formatea archivos TypeScript con Prettier.
 npm test
 ```
 
-Ejecuta pruebas unitarias. Actualmente incluye tests de dominio en
-`test/unit/domain`.
+Ejecuta pruebas unitarias. Actualmente incluye tests de dominio y aplicacion.
 
 ```bash
 npm run test:cov
