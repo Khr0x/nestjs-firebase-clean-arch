@@ -4,7 +4,7 @@ import { InvalidUserDataError } from '../../../src/domain/errors/invalid-user-da
 import { UserCreatedEvent } from '../../../src/domain/events/user-created.event';
 import { User } from '../../../src/domain/entities/user.entity';
 
-describe('User', () => {
+describe('entidad User', () => {
   it('crea un usuario válido con password', () => {
     const user = User.create({
       id: 'user-1',
@@ -63,7 +63,7 @@ describe('User', () => {
   });
 });
 
-describe('UserCreatedEvent', () => {
+describe('evento UserCreatedEvent', () => {
   it('conserva el id del usuario y la bandera de password', () => {
     const event = new UserCreatedEvent('user-1', false);
 
