@@ -15,7 +15,7 @@ import { PasswordGenerator } from '../../../src/domain/ports/password-generator'
 import { PasswordHasher } from '../../../src/domain/ports/password-hasher';
 import { UserRepository } from '../../../src/domain/ports/user.repository';
 
-describe('CreateUserUseCase', () => {
+describe('caso de uso para crear usuarios', () => {
   it('crea usuario con password hasheado y publica evento', async () => {
     const repo = new InMemoryUserRepository();
     const hasher = new FakePasswordHasher();
@@ -80,7 +80,7 @@ describe('CreateUserUseCase', () => {
   });
 });
 
-describe('AssignGeneratedPasswordUseCase', () => {
+describe('caso de uso para asignar password generado', () => {
   it('genera, hashea y actualiza el password cuando falta', async () => {
     const repo = new InMemoryUserRepository([
       User.create({
@@ -129,7 +129,7 @@ describe('AssignGeneratedPasswordUseCase', () => {
   });
 });
 
-describe('CRUD use cases', () => {
+describe('casos de uso CRUD', () => {
   it('obtiene, lista, actualiza y elimina usuarios sin exponer password', async () => {
     const repo = new InMemoryUserRepository([
       User.create({

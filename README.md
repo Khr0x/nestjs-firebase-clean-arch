@@ -128,6 +128,22 @@ En una terminal, levanta Firestore Emulator:
 npm run emulators
 ```
 
+Si falla con `Could not start Firestore Emulator, port taken`, el puerto `8080`
+ya esta ocupado. Revisa el proceso:
+
+```bash
+lsof -nP -iTCP:8080 -sTCP:LISTEN
+```
+
+Si es otro emulador colgado, detenlo:
+
+```bash
+kill <PID>
+```
+
+Alternativa: cambia el puerto de Firestore en `firebase.json` y actualiza
+`FIRESTORE_EMULATOR_HOST` en `.env` con el mismo host/puerto.
+
 En otra terminal, levanta NestJS:
 
 ```bash
