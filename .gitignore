@@ -6,3 +6,4 @@ coverage
 *.log
 serviceAccount*.json
 docs/
+PR_SUMMARY.md

@@ -16,6 +16,32 @@ genere un password seguro y actualice el registro.
 - Jest
 - ESLint + Prettier
 
+## Estado actual
+
+- Fase 1 completada: capa de dominio en TypeScript puro.
+- Tests unitarios de dominio en `test/unit/domain`.
+- Coverage configurado para la capa de dominio con logica.
+- CI en GitHub Actions para validar Pull Requests.
+
+## Arquitectura actual
+
+```text
+src/domain/
+├── entities/
+│   └── user.entity.ts
+├── errors/
+│   └── invalid-user-data.error.ts
+├── events/
+│   └── user-created.event.ts
+└── ports/
+    ├── password-generator.ts
+    ├── password-hasher.ts
+    └── user.repository.ts
+```
+
+La capa `src/domain` no depende de NestJS, Firebase Admin SDK ni bcrypt.
+Los adaptadores concretos se agregaran en fases posteriores.
+
 ## Requisitos
 
 - Node.js
@@ -124,7 +150,14 @@ Formatea archivos TypeScript con Prettier.
 npm test
 ```
 
-Ejecuta pruebas unitarias.
+Ejecuta pruebas unitarias. Actualmente incluye tests de dominio en
+`test/unit/domain`.
+
+```bash
+npm run test:cov
+```
+
+Ejecuta pruebas unitarias con reporte de coverage.
 
 ```bash
 npm run test:watch
@@ -149,6 +182,19 @@ npm run emulators:exec -- "npm run test:e2e"
 ```
 
 Levanta el emulador, corre el comando indicado y apaga el emulador al terminar.
+
+## CI
+
+El workflow `.github/workflows/ci.yml` corre en Pull Requests y en pushes a
+`main`.
+
+Validaciones:
+
+- `npm ci`
+- `npm run lint`
+- `npm test`
+- `npm run test:cov`
+- `npm run build`
 
 ## Firebase y Firestore
 
