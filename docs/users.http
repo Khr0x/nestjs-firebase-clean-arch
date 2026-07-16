@@ -1,0 +1,39 @@
+@baseUrl = http://localhost:3000
+@userId = reemplaza-con-un-id-creado
+
+### Crear usuario con password
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "username": "cristian",
+  "email": "cristian@example.com",
+  "password": "Secret123!"
+}
+
+### Crear usuario sin password
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "username": "ada",
+  "email": "ada@example.com"
+}
+
+### Listar usuarios
+GET {{baseUrl}}/users?page=1&limit=10
+
+### Obtener usuario por id
+GET {{baseUrl}}/users/{{userId}}
+
+### Actualizar usuario
+PATCH {{baseUrl}}/users/{{userId}}
+Content-Type: application/json
+
+{
+  "username": "usuario actualizado",
+  "email": "actualizado@example.com"
+}
+
+### Eliminar usuario
+DELETE {{baseUrl}}/users/{{userId}}
