@@ -4,6 +4,8 @@ import { CryptoPasswordGenerator } from '../../../src/infrastructure/security/cr
 
 describe('generador de passwords con crypto', () => {
   const generator = new CryptoPasswordGenerator();
+  const passwordPolicy =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\-_=+[\]{}]).{8,}$/;
 
   it('genera un password de 16 caracteres con todas las clases requeridas', () => {
     const password = generator.generate();
@@ -13,6 +15,7 @@ describe('generador de passwords con crypto', () => {
     expect(password).toMatch(/[A-Z]/);
     expect(password).toMatch(/[0-9]/);
     expect(password).toMatch(/[!@#$%^&*()\-_=+[\]{}]/);
+    expect(password).toMatch(passwordPolicy);
   });
 
   it('no genera el mismo password dos veces', () => {

@@ -53,12 +53,14 @@ export class FirestoreUserRepository implements UserRepository {
     await this.collection.doc(user.id).update({
       username: user.username,
       email: user.email,
+      updatedAt: user.updatedAt,
     });
   }
 
   async updatePassword(id: string, hashedPassword: string): Promise<void> {
     await this.collection.doc(id).update({
       password: hashedPassword,
+      updatedAt: new Date().toISOString(),
     });
   }
 

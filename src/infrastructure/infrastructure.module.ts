@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { EVENT_PUBLISHER } from '../domain/ports/event-publisher';
 import { PASSWORD_GENERATOR } from '../domain/ports/password-generator';
 import { PASSWORD_HASHER } from '../domain/ports/password-hasher';
@@ -10,7 +11,7 @@ import { BcryptPasswordHasher } from './security/bcrypt-password.hasher';
 import { CryptoPasswordGenerator } from './security/crypto-password.generator';
 
 @Module({
-  imports: [FirebaseModule],
+  imports: [ConfigModule, FirebaseModule],
   providers: [
     { provide: USER_REPOSITORY, useClass: FirestoreUserRepository },
     { provide: PASSWORD_GENERATOR, useClass: CryptoPasswordGenerator },

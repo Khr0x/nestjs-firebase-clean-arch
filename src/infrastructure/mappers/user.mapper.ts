@@ -5,6 +5,8 @@ export type UserDocument = {
   username: string;
   email: string;
   password: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export class UserMapper {
@@ -13,12 +15,14 @@ export class UserMapper {
       username: user.username,
       email: user.email,
       password: user.password ?? null,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 
   static toEntity(id: string, data: unknown): User {
     if (!isUserDocument(data)) {
-      throw new InvalidUserDataError('Firestore user document is invalid');
+      throw new InvalidUserDataError('El documento de usuario en Firestore no es válido');
     }
 
     return User.create({
@@ -26,6 +30,8 @@ export class UserMapper {
       username: data.username,
       email: data.email,
       password: data.password ?? undefined,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     });
   }
 }
@@ -40,6 +46,8 @@ function isUserDocument(value: unknown): value is UserDocument {
   return (
     typeof data.username === 'string' &&
     typeof data.email === 'string' &&
-    (typeof data.password === 'string' || data.password === null)
+    (typeof data.password === 'string' || data.password === null) &&
+    typeof data.createdAt === 'string' &&
+    typeof data.updatedAt === 'string'
   );
 }

@@ -10,8 +10,10 @@ export class UpdateUserUseCase {
   constructor(private readonly users: UserRepository) {}
 
   async execute(id: string, input: UpdateUserInput): Promise<UserOutput> {
+    const email = input.email?.trim().toLowerCase();
+
     if (input.username === undefined && input.email === undefined) {
-      throw new InvalidUserDataError('No user data to update');
+      throw new InvalidUserDataError('No hay datos de usuario para actualizar');
     }
 
     const current = await this.users.findById(id);
@@ -20,19 +22,21 @@ export class UpdateUserUseCase {
       throw new UserNotFoundError(id);
     }
 
-    if (input.email !== undefined && input.email !== current.email) {
-      const existing = await this.users.findByEmail(input.email);
+    if (email !== undefined && email !== current.email) {
+      const existing = await this.users.findByEmail(email);
 
       if (existing && existing.id !== id) {
-        throw new EmailAlreadyInUseError(input.email);
+        throw new EmailAlreadyInUseError(email);
       }
     }
 
     const updated = User.create({
       id: current.id,
       username: input.username ?? current.username,
-      email: input.email ?? current.email,
+      email: email ?? current.email,
       password: current.password,
+      createdAt: current.createdAt,
+      updatedAt: new Date().toISOString(),
     });
 
     await this.users.update(updated);

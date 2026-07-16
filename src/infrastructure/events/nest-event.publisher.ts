@@ -7,7 +7,8 @@ import { EventPublisher } from '../../domain/ports/event-publisher';
 export class NestEventPublisher implements EventPublisher {
   constructor(private readonly events: EventEmitter2) {}
 
-  async publish(event: UserCreatedEvent): Promise<void> {
-    await this.events.emitAsync('user.created', event);
+  publish(event: UserCreatedEvent): Promise<void> {
+    this.events.emit('user.created', event);
+    return Promise.resolve();
   }
 }

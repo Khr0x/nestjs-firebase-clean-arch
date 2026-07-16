@@ -33,7 +33,11 @@ describe('caso de uso para crear usuarios', () => {
       id: output.id,
       username: 'cristian',
       email: 'cristian@example.com',
+      createdAt: output.createdAt,
+      updatedAt: output.updatedAt,
     });
+    expect(typeof output.createdAt).toBe('string');
+    expect(typeof output.updatedAt).toBe('string');
     expect(saved?.password).toBe('hashed:secret123');
     expect(events.published).toEqual([new UserCreatedEvent(output.id, true)]);
   });
@@ -55,6 +59,25 @@ describe('caso de uso para crear usuarios', () => {
 
     expect(saved?.password).toBeUndefined();
     expect(events.published).toEqual([new UserCreatedEvent(output.id, false)]);
+  });
+
+  it('normaliza email antes de guardar', async () => {
+    const repo = new InMemoryUserRepository();
+    const useCase = new CreateUserUseCase(
+      repo,
+      new FakePasswordHasher(),
+      new FakeEventPublisher(),
+    );
+
+    const output = await useCase.execute({
+      username: 'cristian',
+      email: '  Cristian@Example.COM  ',
+    });
+
+    expect(output.email).toBe('cristian@example.com');
+    expect((await repo.findById(output.id))?.email).toBe(
+      'cristian@example.com',
+    );
   });
 
   it('rechaza email duplicado', async () => {
@@ -140,28 +163,38 @@ describe('casos de uso CRUD', () => {
       }),
     ]);
 
-    await expect(new GetUserUseCase(repo).execute('user-1')).resolves.toEqual({
+    const found = await new GetUserUseCase(repo).execute('user-1');
+    expect(found).toEqual({
       id: 'user-1',
       username: 'cristian',
       email: 'cristian@example.com',
+      createdAt: found.createdAt,
+      updatedAt: found.updatedAt,
     });
-    expect(await new ListUsersUseCase(repo).execute()).toEqual([
+    expect(typeof found.createdAt).toBe('string');
+    expect(typeof found.updatedAt).toBe('string');
+
+    const listed = await new ListUsersUseCase(repo).execute();
+    expect(listed).toEqual([
       {
         id: 'user-1',
         username: 'cristian',
         email: 'cristian@example.com',
+        createdAt: listed[0]?.createdAt,
+        updatedAt: listed[0]?.updatedAt,
       },
     ]);
 
-    await expect(
-      new UpdateUserUseCase(repo).execute('user-1', {
-        username: 'cris',
-        email: 'cris@example.com',
-      }),
-    ).resolves.toEqual({
+    const updated = await new UpdateUserUseCase(repo).execute('user-1', {
+      username: 'cris',
+      email: 'cris@example.com',
+    });
+    expect(updated).toEqual({
       id: 'user-1',
       username: 'cris',
       email: 'cris@example.com',
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
     });
     expect((await repo.findById('user-1'))?.password).toBe('hashed:secret123');
 
@@ -185,10 +218,13 @@ describe('casos de uso CRUD', () => {
     expect(repo.lastPage).toBe(1);
     expect(repo.lastLimit).toBe(10);
 
-    expect((await useCase.execute(2, 10))[0]).toEqual({
+    const secondPage = await useCase.execute(2, 10);
+    expect(secondPage[0]).toEqual({
       id: 'user-10',
       username: 'user-10',
       email: 'user-10@example.com',
+      createdAt: secondPage[0]?.createdAt,
+      updatedAt: secondPage[0]?.updatedAt,
     });
     expect(repo.lastPage).toBe(2);
     expect(repo.lastLimit).toBe(10);
@@ -214,6 +250,27 @@ describe('casos de uso CRUD', () => {
     await expect(
       new UpdateUserUseCase(repo).execute('user-1', {
         email: 'ana@example.com',
+      }),
+    ).rejects.toThrow(EmailAlreadyInUseError);
+  });
+
+  it('rechaza email duplicado al actualizar aunque venga con espacios o mayúsculas', async () => {
+    const repo = new InMemoryUserRepository([
+      User.create({
+        id: 'user-1',
+        username: 'cristian',
+        email: 'cristian@example.com',
+      }),
+      User.create({
+        id: 'user-2',
+        username: 'ana',
+        email: 'ana@example.com',
+      }),
+    ]);
+
+    await expect(
+      new UpdateUserUseCase(repo).execute('user-1', {
+        email: '  ANA@Example.COM  ',
       }),
     ).rejects.toThrow(EmailAlreadyInUseError);
   });
@@ -299,6 +356,8 @@ class InMemoryUserRepository implements UserRepository {
         username: user.username,
         email: user.email,
         password: hashedPassword,
+        createdAt: user.createdAt,
+        updatedAt: new Date().toISOString(),
       }),
     );
     return Promise.resolve();
