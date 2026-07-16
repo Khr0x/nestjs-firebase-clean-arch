@@ -242,6 +242,11 @@ Terminal 1: levanta Firestore Emulator.
 ```bash
 npm run emulators
 ```
+Visualizar la UI del Firestore en: 
+
+```text
+http://127.0.0.1:4000/firestore
+```
 
 Terminal 2: levanta NestJS.
 
