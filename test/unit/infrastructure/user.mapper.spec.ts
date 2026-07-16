@@ -14,6 +14,8 @@ describe('mapper de usuarios', () => {
       username: 'Ada',
       email: 'ada@example.com',
       password: 'hashed',
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     });
   });
 

@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { Firestore, getFirestore } from 'firebase-admin/firestore';
 
@@ -7,6 +7,7 @@ export const FIRESTORE_DB = Symbol('FIRESTORE_DB');
 
 @Global()
 @Module({
+  imports: [ConfigModule],
   providers: [
     {
       provide: FIRESTORE_DB,

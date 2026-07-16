@@ -17,14 +17,15 @@ export class CreateUserUseCase {
   ) {}
 
   async execute(input: CreateUserInput): Promise<UserOutput> {
-    const existing = await this.users.findByEmail(input.email);
+    const email = input.email.trim().toLowerCase();
+    const existing = await this.users.findByEmail(email);
 
     if (existing) {
-      throw new EmailAlreadyInUseError(input.email);
+      throw new EmailAlreadyInUseError(email);
     }
 
     if (input.password !== undefined && !input.password.trim()) {
-      throw new InvalidUserDataError('Password cannot be empty');
+      throw new InvalidUserDataError('La contraseña no puede estar vacía');
     }
 
     const password = input.password !== undefined
@@ -33,7 +34,7 @@ export class CreateUserUseCase {
     const user = User.create({
       id: randomUUID(),
       username: input.username,
-      email: input.email,
+      email,
       password,
     });
     const created = await this.users.create(user);

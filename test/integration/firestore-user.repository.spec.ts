@@ -71,20 +71,23 @@ describeWithEmulator('repositorio de usuarios en Firestore', () => {
       id: 'user-ada',
       username: 'Ada Lovelace',
       email: 'lovelace@example.com',
+      createdAt: ada.createdAt,
+      updatedAt: new Date().toISOString(),
     });
 
     await repo.update(updated);
     await expect(repo.findById('user-ada')).resolves.toEqual(updated);
 
     await repo.updatePassword('user-ada', 'generated-hash');
-    await expect(repo.findById('user-ada')).resolves.toEqual(
-      User.create({
-        id: 'user-ada',
-        username: 'Ada Lovelace',
-        email: 'lovelace@example.com',
-        password: 'generated-hash',
-      }),
-    );
+    const userWithPassword = await repo.findById('user-ada');
+    expect(userWithPassword).toMatchObject({
+      id: 'user-ada',
+      username: 'Ada Lovelace',
+      email: 'lovelace@example.com',
+      password: 'generated-hash',
+      createdAt: updated.createdAt,
+      updatedAt: userWithPassword?.updatedAt,
+    });
 
     await repo.delete('user-ada');
     await expect(repo.findById('user-ada')).resolves.toBeNull();

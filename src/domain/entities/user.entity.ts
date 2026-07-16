@@ -5,6 +5,8 @@ type CreateUserProps = {
   username: string;
   email: string;
   password?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export class User {
@@ -13,35 +15,48 @@ export class User {
     public readonly username: string,
     public readonly email: string,
     public readonly password?: string,
+    public readonly createdAt: string = new Date().toISOString(),
+    public readonly updatedAt: string = createdAt,
   ) {}
 
   static create(props: CreateUserProps): User {
+    const now = new Date().toISOString();
     const id = props.id.trim();
     const username = props.username.trim();
-    const email = props.email.trim();
+    const email = props.email.trim().toLowerCase();
     const password = props.password?.trim();
+    const createdAt = props.createdAt ?? now;
+    const updatedAt = props.updatedAt ?? createdAt;
 
     if (!id) {
-      throw new InvalidUserDataError('User id is required');
+      throw new InvalidUserDataError('El id del usuario es obligatorio');
     }
 
     if (!username) {
-      throw new InvalidUserDataError('Username is required');
+      throw new InvalidUserDataError('El nombre de usuario es obligatorio');
     }
 
     if (!email) {
-      throw new InvalidUserDataError('Email is required');
+      throw new InvalidUserDataError('El email es obligatorio');
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      throw new InvalidUserDataError('Email is invalid');
+      throw new InvalidUserDataError('El email no tiene un formato válido');
     }
 
     if (props.password !== undefined && !password) {
-      throw new InvalidUserDataError('Password cannot be empty');
+      throw new InvalidUserDataError('La contraseña no puede estar vacía');
     }
 
-    return new User(id, username, email, password);
+    if (Number.isNaN(Date.parse(createdAt))) {
+      throw new InvalidUserDataError('La fecha de creación no es válida');
+    }
+
+    if (Number.isNaN(Date.parse(updatedAt))) {
+      throw new InvalidUserDataError('La fecha de actualización no es válida');
+    }
+
+    return new User(id, username, email, password, createdAt, updatedAt);
   }
 
   hasPassword(): boolean {

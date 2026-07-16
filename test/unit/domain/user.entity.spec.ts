@@ -19,6 +19,9 @@ describe('entidad User', () => {
       email: 'cristian@example.com',
       password: 'secret123',
     });
+    expect(typeof user.createdAt).toBe('string');
+    expect(typeof user.updatedAt).toBe('string');
+    expect(user.createdAt).toBe(user.updatedAt);
     expect(user.hasPassword()).toBe(true);
   });
 
@@ -30,6 +33,8 @@ describe('entidad User', () => {
     });
 
     expect(user.password).toBeUndefined();
+    expect(user.createdAt).toEqual(expect.any(String));
+    expect(user.updatedAt).toEqual(expect.any(String));
     expect(user.hasPassword()).toBe(false);
   });
 
