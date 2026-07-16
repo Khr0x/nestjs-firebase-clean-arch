@@ -40,6 +40,7 @@ describe('caso de uso para crear usuarios', () => {
     expect(typeof output.updatedAt).toBe('string');
     expect(saved?.password).toBe('hashed:secret123');
     expect(events.published).toEqual([new UserCreatedEvent(output.id, true)]);
+    expect(events.published).toHaveLength(1);
   });
 
   it('crea usuario sin password y publica evento', async () => {
@@ -124,6 +125,30 @@ describe('caso de uso para asignar password generado', () => {
     expect((await repo.findById('user-1'))?.password).toBe(
       'hashed:generated-password',
     );
+    expect(generator.calls).toBe(1);
+    expect(repo.updatePasswordCalls).toBe(1);
+  });
+
+  it('no cambia el password si el mismo evento se procesa dos veces', async () => {
+    const repo = new InMemoryUserRepository([
+      User.create({
+        id: 'user-1',
+        username: 'cristian',
+        email: 'cristian@example.com',
+      }),
+    ]);
+    const generator = new FakePasswordGenerator();
+    const useCase = new AssignGeneratedPasswordUseCase(
+      repo,
+      generator,
+      new FakePasswordHasher(),
+    );
+
+    await useCase.execute('user-1');
+    const firstPassword = (await repo.findById('user-1'))?.password;
+    await useCase.execute('user-1');
+
+    expect((await repo.findById('user-1'))?.password).toBe(firstPassword);
     expect(generator.calls).toBe(1);
     expect(repo.updatePasswordCalls).toBe(1);
   });
